@@ -7,12 +7,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
+//@AllArgsConstructor
 @NoArgsConstructor
 public class Order {
     private String name;
     private String size;
 
+    public Order(String name, String size) {
+        this.name = name;
+        this.size = size;
+    }
+    
 
     public String getName() {
         return name;

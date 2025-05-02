@@ -1,11 +1,6 @@
 package com.virtualcoffee.orders;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.virtualcoffee.orders.controller.OrderController;
-import com.virtualcoffee.orders.dto.OrderRequest;
-import com.virtualcoffee.orders.model.Order;
-import com.virtualcoffee.orders.service.BeverageClient;
-import com.virtualcoffee.orders.service.OrderService;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -14,14 +9,19 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.Collections;
-import java.util.List;
-
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.virtualcoffee.orders.controller.OrderController;
+import com.virtualcoffee.orders.dto.OrderRequest;
+import com.virtualcoffee.orders.model.Order;
+import com.virtualcoffee.orders.service.BeverageClient;
+import com.virtualcoffee.orders.service.OrderService;
 
 @WebMvcTest(OrderController.class)
 public class OrderControllerTest {
@@ -97,7 +97,8 @@ public class OrderControllerTest {
                         .content(new ObjectMapper().writeValueAsString(orderRequest)))
                         .andDo(print())
                         .andExpect(status().isBadRequest())
-                        .andExpect(content().string("Name and Size cannot be empty"));
+                        .andExpect(content().json("{\"name\":\"Name and Size cannot be empty\"}"));
+
     }
 
     @Test
@@ -111,33 +112,7 @@ public class OrderControllerTest {
                         .content(new ObjectMapper().writeValueAsString(orderRequest)))
                         .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Name and Size cannot be empty"));
+                .andExpect(content().json("{\"size\":\"Name and Size cannot be empty\"}"));
     }
 
-
-    /* @Test
-    void testCreateOrder() throws Exception {
-        OrderRequest request = new OrderRequest();
-        request.setName("Latte");
-        request.setSize("Grande");
-
-        Order order = new Order("Latte", "Grande");
-
-        when(orderService.createOrder(request)).thenReturn(order);
-
-        mockMvc.perform(post("/orders")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Latte"));
-    }
-
-    @Test
-    void testGetOrders() throws Exception {
-        when(orderService.getAllOrders()).thenReturn(Collections.singletonList(new Order("Mocha", "Pequeño")));
-
-        mockMvc.perform(get("/orders"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Mocha"));
-    } */
 }

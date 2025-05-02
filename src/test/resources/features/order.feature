@@ -1,16 +1,16 @@
-Feature: Order beverage from React frontend
+Feature: Pedido de bebida desde el frontend
 
-  As a client,
-  I want to order a specific beverage from the React frontend,
-  So that I can verify if it was successfully accepted by the system,
-  considering the beverage must exist in the Angular menu.
+  Como cliente
+  Quiero pedir una bebida específica desde el frontend de React
+  Para verificar si fue aceptada correctamente por el sistema
+  Considerando que la bebida debe existir en el menú de Angular
 
-  Scenario: Successfully order a beverage that exists in the menu
-    Given the beverage "Coffee" exists in the menu
-    When I order the beverage "Coffee" with size "Medium"
-    Then the order should be accepted with the message "Order created successfully"
+  Scenario: Pedido exitoso de una bebida disponible
+    Given que la bebida "Test Espresso" está registrada en el menú
+    When el cliente pide la bebida "Test Espresso" desde el frontend de React
+    Then el sistema debe registrar el pedido con la bebida "Test Espresso"
 
-  Scenario: Fail to order a beverage that does not exist in the menu
-    Given the beverage "Tea" does not exist in the menu
-    When I order the beverage "Tea" with size "Small"
-    Then the order should be rejected with the message "Beverage not available"
+  Scenario: Pedido de bebida no disponible
+    Given que la bebida "Fantasía de Unicornio" no está en el menú
+    When el cliente intenta pedir la bebida "Fantasía de Unicornio" desde el frontend de React
+    Then el sistema debe mostrar un mensaje indicando que la bebida no está disponible

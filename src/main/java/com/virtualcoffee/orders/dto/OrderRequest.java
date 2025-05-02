@@ -5,10 +5,10 @@ import lombok.Data;
 
 @Data
 public class OrderRequest {
-    @NotBlank(message="Nombre de bebida es obligatorio, no puede estar vacío")
+    @NotBlank(message = "Name and Size cannot be empty")
     private String name;
 
-    @NotBlank(message="Tamaño de bebida es obligatorio, no puede estar vacío")
+    @NotBlank(message = "Name and Size cannot be empty")
     private String size;
 
     public String getName() {

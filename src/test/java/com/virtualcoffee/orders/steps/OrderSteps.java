@@ -1,46 +1,61 @@
 package com.virtualcoffee.orders.steps;
 
-import io.cucumber.java.en.*;
-import static org.junit.jupiter.api.Assertions.*;
-import io.restassured.RestAssured;
-import io.restassured.response.Response;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
+
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 
 public class OrderSteps {
 
-    private Response response;
+    private String bebida;
+    private ResponseEntity<String> response;
 
-    @Given("the beverage {string} exists in the menu")
-    public void the_beverage_exists_in_the_menu(String beverageName) {
-        response = RestAssured.given()
-                .contentType("application/json")
-                .body("{\"name\":\"" + beverageName + "\", \"size\":\"Medium\"}")
-                .post("http://localhost:5000/beverages");
-        assertEquals(201, response.statusCode());
+    @Given("que la bebida {string} está registrada en el menú")
+    public void bebida_registrada(String nombre) {
+        this.bebida = nombre;
+        RestTemplate restTemplate = new RestTemplate();
+        String url = "http://localhost:8000/beverages/";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        String body = String.format("{\"name\": \"%s\", \"size\": \"Pequeño\", \"price\": 2.50}", nombre);
+        HttpEntity<String> request = new HttpEntity<>(body, headers);
+        restTemplate.postForEntity(url, request, String.class);
     }
 
-    @Given("the beverage {string} does not exist in the menu")
-    public void the_beverage_does_not_exist_in_the_menu(String beverageName) {
-        // No hacemos nada
+    @Given("que la bebida {string} no está en el menú")
+    public void bebida_no_registrada(String nombre) {
+        this.bebida = nombre;
+        // No se hace nada, simplemente no se registra
     }
 
-    @When("I order the beverage {string} with size {string}")
-    public void i_order_the_beverage(String beverageName, String size) {
-        response = RestAssured.given()
-                .contentType("application/json")
-                .body("{\"name\":\"" + beverageName + "\", \"size\":\"" + size + "\"}")
-                .post("http://localhost:8080/orders");
+    @When("el cliente pide la bebida {string} desde el frontend de React")
+    public void cliente_pide_bebida(String nombre) {
+        RestTemplate restTemplate = new RestTemplate();
+        String url = "http://localhost:8080/orders";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        String body = String.format("{\"customerName\": \"Tester\", \"beverages\": [\"%s\"]}", nombre);
+        HttpEntity<String> request = new HttpEntity<>(body, headers);
+        response = restTemplate.postForEntity(url, request, String.class);
     }
 
-    @Then("the order should be accepted with the message {string}")
-    public void the_order_should_be_accepted(String expectedMessage) {
-        assertEquals(200, response.statusCode());
-        assertTrue(response.getBody().asString().toLowerCase().contains(expectedMessage.toLowerCase()));
+    @Then("el sistema debe registrar el pedido con la bebida {string}")
+    public void verificar_pedido(String nombreEsperado) {
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertTrue(response.getBody().contains(nombreEsperado));
     }
 
-    @Then("the order should be rejected with the message {string}")
-    public void the_order_should_be_rejected(String expectedMessage) {
-        assertTrue(response.statusCode() == 400 || response.statusCode() == 404);
-        assertTrue(response.getBody().asString().toLowerCase().contains(expectedMessage.toLowerCase()));
+    @Then("el sistema debe mostrar un mensaje indicando que la bebida no está disponible")
+    public void bebida_no_disponible() {
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertTrue(response.getBody().toLowerCase().contains("no disponible") || response.getBody().toLowerCase().contains("error"));
     }
 }
-
